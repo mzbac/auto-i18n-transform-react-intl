@@ -102,7 +102,6 @@ const autoI18nPlugin = declare((api, { texts, fileName }) => {
           path.replaceWith(replaceExpression);
         } catch (e) {
           path.replaceWith(api.types.JSXExpressionContainer(replaceExpression));
-          //console.log("error on transform -", fileName, e);
         }
         path.skip();
       },
@@ -119,7 +118,6 @@ const autoI18nPlugin = declare((api, { texts, fileName }) => {
           path.replaceWith(replaceExpression);
         } catch (e) {
           path.replaceWith(api.types.JSXExpressionContainer(replaceExpression));
-          // console.log("error on transform -", fileName, e);
         }
         path.skip();
       },
@@ -146,7 +144,9 @@ const autoI18nPlugin = declare((api, { texts, fileName }) => {
           try {
             path.replaceWith(replaceExpression);
           } catch (e) {
-            console.log("error on transform -", fileName, e);
+            path.replaceWith(
+              api.types.JSXExpressionContainer(replaceExpression)
+            );
           }
           path.skip();
         }

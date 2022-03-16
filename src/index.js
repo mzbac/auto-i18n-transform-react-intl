@@ -32,20 +32,24 @@ filenames.forEach((fileName) => {
     plugins: ["jsx", "typescript"],
     ranges: true,
   });
-  const { code } = transformFromAstSync(ast, sourceCode, {
-    plugins: [
-      [
-        autoI18nPlugin,
-        {
-          fileName: fileName.split("/").slice(-1)[0],
-          texts,
-        },
+  try {
+    const { code } = transformFromAstSync(ast, sourceCode, {
+      plugins: [
+        [
+          autoI18nPlugin,
+          {
+            fileName: fileName.split("/").slice(-1)[0],
+            texts,
+          },
+        ],
       ],
-    ],
-  });
+    });
 
-  const prettier = require("prettier");
-  fse.writeFileSync(fileName, prettier.format(code, { parser: "babel" }));
+    const prettier = require("prettier");
+    fse.writeFileSync(fileName, prettier.format(code, { parser: "babel" }));
+  } catch (e) {
+    console.log("error on transform file : ", fileName, e);
+  }
 });
 
 const content = `export const resource = ${JSON.stringify(texts, null, 4)};\n`;

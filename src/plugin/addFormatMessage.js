@@ -9,17 +9,16 @@ module.exports = function (path) {
     if (!path.scope.getBinding("formatMessage")) {
       const importAst = template.ast(`const { formatMessage } = useIntl();`);
       try {
-        if (jsxComponentFunction.node.body.body) {
-          if (
-            !jsxComponentFunction.node.body.body.find((elm) => {
-              return (
-                babelTypes.isVariableDeclaration(elm) &&
-                elm.declarations.find((d) => d.init?.callee?.name === "useIntl")
-              );
-            })
-          ) {
-            jsxComponentFunction.node.body.body.unshift(importAst);
-          }
+        if (
+          jsxComponentFunction.node.body.body &&
+          !jsxComponentFunction.node.body.body.find((elm) => {
+            return (
+              babelTypes.isVariableDeclaration(elm) &&
+              elm.declarations.find((d) => d.init?.callee?.name === "useIntl")
+            );
+          })
+        ) {
+          jsxComponentFunction.node.body.body.unshift(importAst);
         } else {
           if (
             !jsxComponentFunction.node.body.children.find((elm) => {
