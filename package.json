@@ -2,6 +2,9 @@
   "name": "auto-i18n-transform-react-intl",
   "version": "1.0.0",
   "main": "index.js",
+  "engines": {
+    "node": ">=16.14.1"
+  }
   "license": "MIT",
   "dependencies": {
     "@babel/core": "^7.17.7",
