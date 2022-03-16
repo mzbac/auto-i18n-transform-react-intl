@@ -1,0 +1,19 @@
+{
+
+  "version": "0.2.0",
+  "configurations": [
+   
+    {
+      "type": "pwa-node",
+      "request": "launch",
+      "name": "run",
+      "skipFiles": ["<node_internals>/**"],
+      "program": "${workspaceFolder}/src/index.js",
+      "args": [
+        "./src/test/**/*.tsx",
+        "--out-dir",
+        "./src/messages",
+      ]
+    }
+  ]
+}

@@ -1,12 +1,7 @@
-const { declare } = require('@babel/helper-plugin-utils');
-const { importSpecifier } = require('@babel/types');
-const generate = require('@babel/generator').default;
-const generateKey = require('./hash.js');
-const checkIfNeedUseIntl = require('./checkIfNeedUseIntl.js');
-
-function nextIntlKey(str, fileName) {
-  return generateKey(str, fileName);
-}
+const { declare } = require("@babel/helper-plugin-utils");
+const generate = require("@babel/generator").default;
+const generateKey = require("./hash.js");
+const addFormatMessage = require("./addFormatMessage.js");
 
 const autoI18nPlugin = declare((api, { texts, fileName }) => {
   api.assertVersion(7);
@@ -17,13 +12,14 @@ const autoI18nPlugin = declare((api, { texts, fileName }) => {
     let statement = `formatMessage({
                 id: messageIds.${key}
             })`;
+
     if (expressionParams?.length > 0) {
       statement = `formatMessage({
             id: messageIds.${key}
         },{
             ${expressionParams.reduce((acc, cur, idx) => {
-              return acc + `placeholder${idx}:` + cur + ',';
-            }, '')}
+              return acc + `placeholder${idx}:` + cur + ",";
+            }, "")}
         })`;
     }
     let replaceExpression = api.template.ast(statement).expression;
@@ -48,10 +44,10 @@ const autoI18nPlugin = declare((api, { texts, fileName }) => {
               const source = p.node.source.value;
               const importedUseIntl = p.node.specifiers.find((s) => {
                 return (
-                  s.type === 'ImportSpecifier' && s.imported.name === 'useIntl'
+                  s.type === "ImportSpecifier" && s.imported.name === "useIntl"
                 );
               });
-              if (source === 'react-intl' && importedUseIntl) {
+              if (source === "react-intl" && importedUseIntl) {
                 imported = true;
               }
             },
@@ -68,11 +64,11 @@ const autoI18nPlugin = declare((api, { texts, fileName }) => {
           }
 
           path.traverse({
-            'StringLiteral|TemplateLiteral|JSXText'(path) {
+            "StringLiteral|TemplateLiteral|JSXText"(path) {
               if (path.node.leadingComments) {
                 path.node.leadingComments = path.node.leadingComments.filter(
                   (comment, index) => {
-                    if (comment.value.includes('i18n-disable')) {
+                    if (comment.value.includes("i18n-disable")) {
                       path.node.skipTransform = true;
                       return false;
                     }
@@ -81,12 +77,9 @@ const autoI18nPlugin = declare((api, { texts, fileName }) => {
                 );
               }
               const attr = path.findParent(
-                (p) => p.isJSXAttribute() && p.node.name.name === 'className'
+                (p) => p.isJSXAttribute() && p.node.name.name === "className"
               );
               if (attr) {
-                path.node.skipTransform = true;
-              }
-              if (path.findParent((p) => p.isObjectProperty())) {
                 path.node.skipTransform = true;
               }
               if (path.findParent((p) => p.isImportDeclaration())) {
@@ -100,15 +93,16 @@ const autoI18nPlugin = declare((api, { texts, fileName }) => {
         if (path.node.skipTransform) {
           return;
         }
-        let key = nextIntlKey(path.node.value, fileName);
+        let key = generateKey(path.node.value, fileName);
         texts[key] = path.node.value;
-        checkIfNeedUseIntl(path, api);
+        addFormatMessage(path);
 
         const replaceExpression = getReplaceExpression(path, key);
         try {
           path.replaceWith(replaceExpression);
         } catch (e) {
-          console.log('error on transform -', fileName, e);
+          path.replaceWith(api.types.JSXExpressionContainer(replaceExpression));
+          //console.log("error on transform -", fileName, e);
         }
         path.skip();
       },
@@ -116,15 +110,16 @@ const autoI18nPlugin = declare((api, { texts, fileName }) => {
         if (path.node.skipTransform) {
           return;
         }
-        let key = nextIntlKey(path.node.value, fileName);
+        let key = generateKey(path.node.value, fileName);
         texts[key] = path.node.value;
-        checkIfNeedUseIntl(path, api);
+        addFormatMessage(path);
 
         const replaceExpression = getReplaceExpression(path, key);
         try {
           path.replaceWith(replaceExpression);
         } catch (e) {
-          console.log('error on transform -', fileName, e);
+          path.replaceWith(api.types.JSXExpressionContainer(replaceExpression));
+          // console.log("error on transform -", fileName, e);
         }
         path.skip();
       },
@@ -134,24 +129,24 @@ const autoI18nPlugin = declare((api, { texts, fileName }) => {
         }
 
         const value = path
-          .get('quasis')
+          .get("quasis")
           .map((item) => item.node.value.raw)
           .reduce((acc, cur, idx) => {
             return acc + cur + `{placeholder${idx}}`;
-          }, '');
+          }, "");
 
         if (value) {
-          let key = nextIntlKey(value, fileName);
+          let key = generateKey(value, fileName);
 
           texts[key] = value;
 
-          checkIfNeedUseIntl(path, api);
+          addFormatMessage(path);
 
           const replaceExpression = getReplaceExpression(path, key);
           try {
             path.replaceWith(replaceExpression);
           } catch (e) {
-            console.log('error on transform -', fileName, e);
+            console.log("error on transform -", fileName, e);
           }
           path.skip();
         }

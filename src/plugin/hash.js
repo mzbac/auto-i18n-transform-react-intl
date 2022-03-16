@@ -1,28 +1,28 @@
-const crypto = require('crypto');
+const crypto = require("crypto");
 
-const chars = new Set('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_$');
+const chars = new Set("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_$");
 
 const generateKey = function (str, fileName) {
   fileName = fileName
-    .replace('.js', '')
-    .replace('.ts', '')
-    .replace('.tx', '')
-    .replace('.jsx', '')
-    .split('')
+    .replace(".jsx", "")
+    .replace(".js", "")
+    .replace(".tsx", "")
+    .replace(".ts", "")
+    .split("")
     .map((c) => {
       if (!chars.has(c)) {
-        return '_';
+        return "_";
       } else {
         return c;
       }
     })
-    .join('');
-  const hashSum = crypto.createHash('sha256');
+    .join("");
+  const hashSum = crypto.createHash("sha256");
   var enc = new TextEncoder();
 
   hashSum.update(enc.encode(str));
 
-  return `${fileName}_` + hashSum.digest('hex').slice(0, 7);
+  return `${fileName}_` + hashSum.digest("hex").slice(0, 7);
 };
 
 module.exports = generateKey;
