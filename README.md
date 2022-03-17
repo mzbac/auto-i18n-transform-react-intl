@@ -25,7 +25,7 @@ import React from "react";
 export default App = () => {
   const aStr = "something";
   const bStr = 'something else';
-  return <div>Hellow world</div>;
+  return <div>hello world</div>;
 };
 ```
 To
@@ -55,7 +55,7 @@ export default App = () => {
 export const resource = {
     "sourcecode_3fc9b68": "something",
     "sourcecode_f41f3fa": "something else",
-    "sourcecode_df6387f": "Hellow world"
+    "sourcecode_df6387f": "hello world"
 };
 ```
 ```js
