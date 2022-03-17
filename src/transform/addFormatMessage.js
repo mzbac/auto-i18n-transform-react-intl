@@ -21,6 +21,7 @@ module.exports = function (path) {
           jsxComponentFunction.node.body.body.unshift(importAst);
         } else {
           if (
+            jsxComponentFunction.node.body.children &&
             !jsxComponentFunction.node.body.children.find((elm) => {
               return (
                 babelTypes.isVariableDeclaration(elm) &&

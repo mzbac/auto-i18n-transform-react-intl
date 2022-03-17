@@ -1,13 +1,15 @@
-const { transformFromAstSync } = require("@babel/core");
 const parser = require("@babel/parser");
+const generate = require("@babel/generator").default;
 const fse = require("fs-extra");
-const autoI18nPlugin = require("./plugin/auto-i18n-plugin");
+const autoI18nTransform = require("./transform/auto-i18n-transform");
 const fs = require("fs");
 const path = require("path");
 const commander = require("commander");
 const glob = require("glob");
+
 commander.option("--out-dir <outDir>", "output directory");
-commander.option("--exclude  <exclude>", "excluded filename");
+commander.option("--ignore  <ignore>", "ignore files name");
+commander.option("--test  <t>", "generate file with suffix");
 
 commander.parse(process.argv);
 const cliOpts = commander.opts();
@@ -19,8 +21,8 @@ if (!cliOpts.outDir) {
 
 let filenames = glob.sync(commander.args[0]);
 let texts = {};
-if (cliOpts.exclude) {
-  filenames = filenames.filter((f) => !f.includes(cliOpts.exclude));
+if (cliOpts.ignore) {
+  filenames = filenames.filter((f) => !f.includes(cliOpts.ignore));
 }
 filenames.forEach((fileName) => {
   const sourceCode = fs.readFileSync(fileName, {
@@ -33,20 +35,16 @@ filenames.forEach((fileName) => {
     ranges: true,
   });
   try {
-    const { code } = transformFromAstSync(ast, sourceCode, {
-      plugins: [
-        [
-          autoI18nPlugin,
-          {
-            fileName: fileName.split("/").slice(-1)[0],
-            texts,
-          },
-        ],
-      ],
+    const t_ast = autoI18nTransform(ast, {
+      fileName: fileName.split("/").slice(-1)[0],
+      texts,
     });
-
+    const { code } = generate(t_ast, { sourceMaps: false });
     const prettier = require("prettier");
-    fse.writeFileSync(fileName, prettier.format(code, { parser: "babel" }));
+    fse.writeFileSync(
+      cliOpts.t ? fileName + "_t" : fileName,
+      prettier.format(code, { parser: "babel" })
+    );
   } catch (e) {
     console.log("error on transform file : ", fileName, e);
   }
