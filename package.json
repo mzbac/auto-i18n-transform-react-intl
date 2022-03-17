@@ -2,6 +2,7 @@
   "name": "auto-i18n-transform-react-intl",
   "version": "1.0.0",
   "main": "lib/index.js",
+  "bin": "lib/index.js",
   "engines": {
     "node": ">=16.14.1"
   },
