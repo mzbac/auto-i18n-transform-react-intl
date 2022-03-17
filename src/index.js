@@ -9,7 +9,10 @@ const glob = require("glob");
 
 commander.option("--out-dir <outDir>", "output directory");
 commander.option("--ignore  <ignore>", "ignore files name");
-commander.option("--test  <t>", "generate file with suffix");
+commander.option(
+  "--test  <t>",
+  "generate sourcecode file with suffix instead of override exist file"
+);
 
 commander.parse(process.argv);
 const cliOpts = commander.opts();
