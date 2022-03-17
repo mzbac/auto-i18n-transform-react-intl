@@ -20,7 +20,7 @@ npx auto-i18n-transform-react-intl --help
 
 Transform js file wrapper raw string and inject react-intl and useIntl 
 ```npx
-npx auto-i18n-transform-react-intl 'sourceCode.js' --out-dir output_dir_for_locale_files
+npx auto-i18n-transform-react-intl 'src/**/*.js' --out-dir output_dir_for_locale_files
 ```
 From 
 ```js
