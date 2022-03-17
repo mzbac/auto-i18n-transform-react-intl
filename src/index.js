@@ -10,11 +10,12 @@ const glob = require("glob");
 commander.option("--out-dir <outDir>", "output directory");
 commander.option("--ignore  <ignore>", "ignore files name");
 commander.option(
-  "--test  <t>",
+  "--test  [t]",
   "generate sourcecode file with suffix instead of override exist file"
 );
 
 commander.parse(process.argv);
+
 const cliOpts = commander.opts();
 if (!cliOpts.outDir) {
   console.error("no output directory specified");
@@ -41,11 +42,12 @@ filenames.forEach((fileName) => {
     const t_ast = autoI18nTransform(ast, {
       fileName: fileName.split("/").slice(-1)[0],
       texts,
+      outDir: cliOpts.outDir,
     });
     const { code } = generate(t_ast, { sourceMaps: false });
     const prettier = require("prettier");
     fse.writeFileSync(
-      cliOpts.t ? fileName + "_t" : fileName,
+      cliOpts.test ? fileName + "_t.js" : fileName,
       prettier.format(code, { parser: "babel" })
     );
   } catch (e) {

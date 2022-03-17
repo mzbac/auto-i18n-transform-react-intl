@@ -35,7 +35,7 @@ function getReplaceExpression(path, key) {
   return replaceExpression;
 }
 
-const autoI18nTransform = function (ast, { texts, fileName }) {
+const autoI18nTransform = function (ast, { texts, fileName, outDir }) {
   traverse(ast, {
     Program: {
       enter(path) {
@@ -58,7 +58,7 @@ const autoI18nTransform = function (ast, { texts, fileName }) {
             `import { useIntl } from 'react-intl'`
           );
           const importAst2 = template.ast(
-            `import { messageIds } from 'messages'`
+            `import { messageIds } from '${outDir}'`
           );
           path.node.body.unshift(importAst2);
           path.node.body.unshift(importAst);

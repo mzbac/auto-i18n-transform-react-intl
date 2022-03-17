@@ -13,6 +13,9 @@
         "./src/test/**/*.js",
         "--out-dir",
         "./src/locale",
+        "--ignore",
+        "_tests_",
+        "--test"
       ]
     }
   ]
