@@ -1,10 +1,13 @@
 # Auto-i18n-transform-react-intl
 
 ## Why?
-Internationalize your web apps is hard. you need to support different currency, date format and translation on client and server. 
-For frontend part, you need to extract all the string values to into locale file and wrap it in your code with some sort of wrapper like `intl.t(key of the string in locale file)`
-If you have tons of the hardcoded string value in your code base. The effort of manually doing it will be tremendous.
-So this project is try to figure out if there is way we can automate the tedious and repetitive task?
+Internationalize your web apps is hard. It needs to support different currencies, date formats and translations on client and server. 
+
+For frontend part, most likely you may have to extract all the string values into locale file and wrap it in your code with kind of wrapper such as `intl.t(key of the string in locale file)`
+
+If you have tons of the hardcoded string values in your code base, the effort of manually doing it will be tremendous.
+
+So this project is my first attempt of automating the tedious and repetitive task.
 
 ## Usage (CLI)
 ```npx
