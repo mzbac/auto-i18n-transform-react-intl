@@ -39,17 +39,19 @@ filenames.forEach((fileName) => {
     ranges: true,
   });
   try {
-    const t_ast = autoI18nTransform(ast, {
+    const isTransformed = autoI18nTransform(ast, {
       fileName: fileName.split("/").slice(-1)[0],
       texts,
       outDir: cliOpts.outDir,
     });
-    const { code } = generate(t_ast, { sourceMaps: false });
-    const prettier = require("prettier");
-    fse.writeFileSync(
-      cliOpts.test ? fileName + "_t.js" : fileName,
-      prettier.format(code, { parser: "babel" })
-    );
+    if (isTransformed) {
+      const { code } = generate(ast, { sourceMaps: false });
+      const prettier = require("prettier");
+      fse.writeFileSync(
+        cliOpts.test ? fileName + "_t.js" : fileName,
+        prettier.format(code, { parser: "babel" })
+      );
+    }
   } catch (e) {
     console.log("error on transform file : ", fileName, e);
   }

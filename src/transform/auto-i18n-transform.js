@@ -166,6 +166,6 @@ const autoI18nTransform = function (ast, { texts, fileName, outDir }) {
     },
   });
 
-  return ast;
+  return transformed;
 };
 module.exports = autoI18nTransform;
