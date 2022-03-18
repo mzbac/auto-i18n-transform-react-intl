@@ -36,34 +36,10 @@ function getReplaceExpression(path, key) {
 }
 
 const autoI18nTransform = function (ast, { texts, fileName, outDir }) {
+  let transformed = false;
   traverse(ast, {
     Program: {
       enter(path) {
-        let imported;
-        path.traverse({
-          ImportDeclaration(p) {
-            const source = p.node.source.value;
-            const importedUseIntl = p.node.specifiers.find((s) => {
-              return (
-                babelTypes.isImportSpecifier(s) && s.imported.name === "useIntl"
-              );
-            });
-            if (source === "react-intl" && importedUseIntl) {
-              imported = true;
-            }
-          },
-        });
-        if (!imported) {
-          const importAst = template.ast(
-            `import { useIntl } from 'react-intl'`
-          );
-          const importAst2 = template.ast(
-            `import { messageIds } from '${outDir}'`
-          );
-          path.node.body.unshift(importAst2);
-          path.node.body.unshift(importAst);
-        }
-
         path.traverse({
           "StringLiteral|TemplateLiteral|JSXText"(path) {
             if (path.node.leadingComments) {
@@ -89,38 +65,75 @@ const autoI18nTransform = function (ast, { texts, fileName, outDir }) {
           },
         });
       },
+      exit(path) {
+        if (transformed) {
+          let imported;
+          path.traverse({
+            ImportDeclaration(p) {
+              const source = p.node.source.value;
+              const importedUseIntl = p.node.specifiers.find((s) => {
+                return (
+                  babelTypes.isImportSpecifier(s) &&
+                  s.imported.name === "useIntl"
+                );
+              });
+              if (source === "react-intl" && importedUseIntl) {
+                imported = true;
+              }
+            },
+          });
+          if (!imported) {
+            const importAst = template.ast(
+              `import { useIntl } from 'react-intl'`
+            );
+            const importAst2 = template.ast(
+              `import { messageIds } from '${outDir}'`
+            );
+            path.node.body.unshift(importAst2);
+            path.node.body.unshift(importAst);
+          }
+        }
+      },
     },
     StringLiteral(path) {
       if (path.node.skipTransform) {
         return;
       }
-      let key = generateKey(path.node.value, fileName);
-      texts[key] = path.node.value;
-      addFormatMessage(path);
-
-      const replaceExpression = getReplaceExpression(path, key);
-      try {
-        path.replaceWith(replaceExpression);
-      } catch (e) {
-        path.replaceWith(babelTypes.JSXExpressionContainer(replaceExpression));
+      const isJsx = addFormatMessage(path);
+      if (isJsx) {
+        transformed = true;
+        let key = generateKey(path.node.value, fileName);
+        texts[key] = path.node.value;
+        const replaceExpression = getReplaceExpression(path, key);
+        try {
+          path.replaceWith(replaceExpression);
+        } catch (e) {
+          path.replaceWith(
+            babelTypes.JSXExpressionContainer(replaceExpression)
+          );
+        }
+        path.skip();
       }
-      path.skip();
     },
     JSXText(path) {
       if (path.node.skipTransform) {
         return;
       }
-      let key = generateKey(path.node.value, fileName);
-      texts[key] = path.node.value;
-      addFormatMessage(path);
-
-      const replaceExpression = getReplaceExpression(path, key);
-      try {
-        path.replaceWith(replaceExpression);
-      } catch (e) {
-        path.replaceWith(babelTypes.JSXExpressionContainer(replaceExpression));
+      const isJsx = addFormatMessage(path);
+      if (isJsx) {
+        transformed = true;
+        let key = generateKey(path.node.value, fileName);
+        texts[key] = path.node.value;
+        const replaceExpression = getReplaceExpression(path, key);
+        try {
+          path.replaceWith(replaceExpression);
+        } catch (e) {
+          path.replaceWith(
+            babelTypes.JSXExpressionContainer(replaceExpression)
+          );
+        }
+        path.skip();
       }
-      path.skip();
     },
     TemplateLiteral(path) {
       if (path.node.skipTransform) {
@@ -134,21 +147,21 @@ const autoI18nTransform = function (ast, { texts, fileName, outDir }) {
       }
       const value = guasis.join("");
       if (value) {
-        let key = generateKey(value, fileName);
-
-        texts[key] = value;
-
-        addFormatMessage(path);
-
-        const replaceExpression = getReplaceExpression(path, key);
-        try {
-          path.replaceWith(replaceExpression);
-        } catch (e) {
-          path.replaceWith(
-            babelTypes.JSXExpressionContainer(replaceExpression)
-          );
+        const isJsx = addFormatMessage(path);
+        if (isJsx) {
+          transformed = true;
+          let key = generateKey(value, fileName);
+          texts[key] = value;
+          const replaceExpression = getReplaceExpression(path, key);
+          try {
+            path.replaceWith(replaceExpression);
+          } catch (e) {
+            path.replaceWith(
+              babelTypes.JSXExpressionContainer(replaceExpression)
+            );
+          }
+          path.skip();
         }
-        path.skip();
       }
     },
   });

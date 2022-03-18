@@ -10,7 +10,7 @@
       "skipFiles": ["<node_internals>/**"],
       "program": "${workspaceFolder}/src/index.js",
       "args": [
-        "./src/test/**/*.js",
+        "./src/test/**/*.tsx",
         "--out-dir",
         "./src/locale",
         "--ignore",

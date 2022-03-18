@@ -2,10 +2,12 @@ const template = require("@babel/template").default;
 const babelTypes = require("@babel/types");
 
 module.exports = function (path) {
+  let isJsx = false;
   const jsxComponentFunction = path.findParent((p) =>
     checkJsxComponentDeclaration(p)
   );
   if (jsxComponentFunction) {
+    isJsx = true;
     if (!path.scope.getBinding("formatMessage")) {
       const importAst = template.ast(`const { formatMessage } = useIntl();`);
       try {
@@ -37,6 +39,8 @@ module.exports = function (path) {
       }
     }
   }
+
+  return isJsx;
 };
 
 function checkJsxComponentDeclaration(path) {
