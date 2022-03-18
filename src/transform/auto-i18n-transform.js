@@ -4,6 +4,9 @@ const addFormatMessage = require("./addFormatMessage.js");
 const template = require("@babel/template").default;
 const traverse = require("@babel/traverse").default;
 const babelTypes = require("@babel/types");
+const { htmlAttrs, svgAttrs } = require("./htmlAttributes.js");
+
+const ignoreAttrs = [...htmlAttrs, ...svgAttrs];
 
 function getReplaceExpression(path, key) {
   const expressionParams = path.isTemplateLiteral()
@@ -54,7 +57,8 @@ const autoI18nTransform = function (ast, { texts, fileName, outDir }) {
               );
             }
             const attr = path.findParent(
-              (p) => p.isJSXAttribute() && p.node.name.name === "className"
+              (p) =>
+                p.isJSXAttribute() && ignoreAttrs.includes(p.node.name.name)
             );
             if (attr) {
               path.node.skipTransform = true;
